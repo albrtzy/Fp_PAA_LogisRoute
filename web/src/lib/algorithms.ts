@@ -2,6 +2,7 @@ export interface Node {
   id: number;
   x: number;
   y: number;
+  name?: string; // Tambahan properti untuk menyimpan nama daerah
 }
 
 export interface Edge {
@@ -23,8 +24,8 @@ export class Graph {
     this.adj = Array.from({ length: V }, () => []);
   }
 
-  addNode(id: number, x: number, y: number) {
-    this.nodes.push({ id, x, y });
+  addNode(id: number, x: number, y: number, name: string = "") {
+    this.nodes.push({ id, x, y, name });
   }
 
   addEdge(u: number, v: number, weight: number) {
@@ -36,21 +37,11 @@ export class Graph {
 
 const INF = Number.MAX_SAFE_INTEGER;
 
-// ==========================================
-// 1. DIJKSTRA ALGORITHM
-// ==========================================
 export function runDijkstra(G: Graph, source: number) {
   const dist = new Array(G.V).fill(INF);
   const parent = new Array(G.V).fill(-1);
   dist[source] = 0;
 
-  // PENJELASAN ANOMALI PERFORMA:
-  // Di C++, kita bisa menggunakan std::priority_queue (Min-Heap) yang beroperasi dalam O(log V).
-  // Namun, JavaScript/TypeScript tidak memiliki struktur data Priority Queue bawaan.
-  // Sebagai gantinya, kita menggunakan Array biasa yang di-sort setiap kali ada iterasi.
-  // Proses pq.sort() ini memakan waktu O(N log N) di setiap putaran loop.
-  // Inilah alasan utama mengapa Dijkstra terlihat sangat lambat (bottleneck) di ekosistem Web (V8 Engine)
-  // saat menangani ribuan Vertex, menggeser performanya jauh dari batas teoritis O((V+E) log V).
   const pq: { d: number; u: number }[] = [{ d: 0, u: source }];
 
   while (pq.length > 0) {
@@ -71,9 +62,6 @@ export function runDijkstra(G: Graph, source: number) {
   return { dist, parent };
 }
 
-// ==========================================
-// 2. BELLMAN-FORD ALGORITHM
-// ==========================================
 export function runBellmanFord(G: Graph, source: number) {
   const dist = new Array(G.V).fill(INF);
   dist[source] = 0;
@@ -90,34 +78,50 @@ export function runBellmanFord(G: Graph, source: number) {
         }
       }
     }
-    // Optimasi mutlak yang membuat algoritma ini mengalahkan Dijkstra di data acak
     if (!relaxed) break;
   }
   return { dist };
 }
 
-// ==========================================
-// FUNGSI GENERATOR GRAF
-// ==========================================
-export function generateVisualGraph(numNodes: number): Graph {
+// GENERATOR PETA SURABAYA
+export function generateVisualGraph(): Graph {
+  const surabayaAreas = [
+    "Gudang Pusat Rungkut", // Index 0 (Titik Mulai)
+    "Kampus ITS Sukolilo",
+    "Keputih",
+    "Gubeng",
+    "Pakuwon City",
+    "Kertajaya",
+    "Tunjungan",
+    "Kenjeran",
+    "Tanjung Perak",
+    "Wonokromo",
+    "Jambangan",
+    "Darmo"
+  ];
+  
+  const numNodes = surabayaAreas.length;
   const G = new Graph(numNodes);
+  
   for (let i = 0; i < numNodes; i++) {
-    G.addNode(i, Math.floor(Math.random() * 80) + 10, Math.floor(Math.random() * 80) + 10);
+    G.addNode(i, Math.floor(Math.random() * 80) + 10, Math.floor(Math.random() * 70) + 10, surabayaAreas[i]);
   }
+  
   for (let i = 0; i < numNodes; i++) {
     const target = (i + 1) % numNodes;
-    const weight = Math.floor(Math.random() * 50) + 10;
+    const weight = Math.floor(Math.random() * 15) + 2; // Simulasi jarak 2km - 17km
     G.addEdge(i, target, weight);
-    if (Math.random() > 0.5) {
+    if (Math.random() > 0.4) {
       const randomTarget = Math.floor(Math.random() * numNodes);
       if (randomTarget !== i && randomTarget !== target) {
-        G.addEdge(i, randomTarget, Math.floor(Math.random() * 50) + 10);
+        G.addEdge(i, randomTarget, Math.floor(Math.random() * 15) + 2);
       }
     }
   }
   return G;
 }
 
+// Generator Benchmark Tetap Menggunakan Titik Acak agar bisa ribuan data
 export function generateBenchmarkGraph(V: number, E: number): Graph {
   const G = new Graph(V);
   for (let i = 0; i < E; i++) {

@@ -10,13 +10,17 @@ export default function LogisRouteDashboard() {
   const [benchmarkData, setBenchmarkData] = useState<any[]>([]);
 
   useEffect(() => {
-    setGraph(generateVisualGraph(15));
+    // Tidak butuh parameter angka lagi karena fix memakai list daerah
+    setGraph(generateVisualGraph());
   }, []);
 
   const handleRunVisualizer = () => {
     if (!graph) return;
-    const { parent } = runDijkstra(graph, 0);
-    const target = graph.V - 1;
+    const { parent } = runDijkstra(graph, 0); // Selalu mulai dari Gudang Pusat (Node 0)
+    
+    // Cari node tujuan acak (selain node 0)
+    let target = Math.floor(Math.random() * (graph.V - 1)) + 1;
+    
     let curr = target;
     const newPath = new Set<string>();
     
@@ -34,7 +38,7 @@ export default function LogisRouteDashboard() {
     setBenchmarkData([]);
 
     setTimeout(() => {
-      const sizes = [100, 500, 1000, 2500, 5000]; // 5 ukuran sesuai syarat tugas
+      const sizes = [100, 500, 1000, 2500, 5000]; 
       const results = [];
 
       for (const V of sizes) {
@@ -56,18 +60,14 @@ export default function LogisRouteDashboard() {
     }, 100);
   };
 
-  // Logika Cerdas Pembuat Kesimpulan Dinamis (Versi Simpel)
   const renderInsight = () => {
     if (benchmarkData.length === 0) return null;
-
-    // Ambil data dari pengujian skala terbesar (elemen terakhir di array)
     const lastResult = benchmarkData[benchmarkData.length - 1];
     const timeD = parseFloat(lastResult.timeD);
     const timeB = parseFloat(lastResult.timeB);
     const V = lastResult.V;
 
     if (timeB < timeD) {
-      // Kondisi: Bellman-Ford Menang
       return (
         <div className="mt-6 p-4 bg-indigo-50 border border-indigo-100 rounded-lg">
           <h3 className="text-sm font-bold text-indigo-900 mb-2 flex items-center">
@@ -82,7 +82,6 @@ export default function LogisRouteDashboard() {
         </div>
       );
     } else {
-      // Kondisi: Dijkstra Menang
       return (
         <div className="mt-6 p-4 bg-emerald-50 border border-emerald-100 rounded-lg">
           <h3 className="text-sm font-bold text-emerald-900 mb-2 flex items-center">
@@ -104,16 +103,17 @@ export default function LogisRouteDashboard() {
         
         <header className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
           <h1 className="text-3xl font-bold text-slate-900">LogisRoute Dashboard</h1>
-          <p className="text-slate-500 mt-2">Sistem Optimasi Rute Pengiriman (Dijkstra vs Bellman-Ford)</p>
+          <p className="text-slate-500 mt-2">Sistem Optimasi Rute Pengiriman Peta Surabaya</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col">
-            <h2 className="text-xl font-semibold mb-4">Live Visualizer (Simulasi Peta)</h2>
-            <div className="relative bg-slate-900 flex-grow rounded-lg overflow-hidden min-h-[400px]">
+            <h2 className="text-xl font-semibold mb-4">Live Visualizer (Peta Surabaya)</h2>
+            <div className="relative bg-slate-900 flex-grow rounded-lg overflow-hidden min-h-[500px]">
               {graph && (
                 <svg className="absolute inset-0 w-full h-full">
+                  {/* Garis Jalan */}
                   {graph.edges.map((edge, idx) => {
                     const uNode = graph.nodes.find((n) => n.id === edge.u)!;
                     const vNode = graph.nodes.find((n) => n.id === edge.v)!;
@@ -131,39 +131,55 @@ export default function LogisRouteDashboard() {
                         <text
                           x={`${(uNode.x + vNode.x) / 2}%`}
                           y={`${(uNode.y + vNode.y) / 2}%`}
-                          fill={isHighlighted ? "#10b981" : "#64748b"}
-                          fontSize="12"
+                          fill={isHighlighted ? "#10b981" : "#475569"}
+                          fontSize="11"
+                          fontWeight="bold"
                         >
-                          {edge.weight}
+                          {edge.weight} km
                         </text>
                       </g>
                     );
                   })}
+                  {/* Titik Lokasi */}
                   {graph.nodes.map((node) => (
-                    <circle
-                      key={node.id}
-                      cx={`${node.x}%`} cy={`${node.y}%`}
-                      r="12"
-                      fill={node.id === 0 ? "#3b82f6" : "#1e293b"}
-                      stroke="#cbd5e1"
-                      strokeWidth="2"
-                    />
+                    <g key={node.id}>
+                      <circle
+                        cx={`${node.x}%`} cy={`${node.y}%`}
+                        r="12"
+                        fill={node.id === 0 ? "#ef4444" : "#1e293b"} // Gudang warna Merah
+                        stroke="#cbd5e1"
+                        strokeWidth="2"
+                        className="transition-all duration-300"
+                      />
+                      {/* Label Nama Daerah Surabaya */}
+                      <text
+                        x={`${node.x}%`} 
+                        y={`${node.y + 6}%`} 
+                        fill="#cbd5e1"
+                        fontSize="11"
+                        fontWeight="bold"
+                        textAnchor="middle"
+                        className="pointer-events-none drop-shadow-md"
+                      >
+                        {node.name}
+                      </text>
+                    </g>
                   ))}
                 </svg>
               )}
             </div>
             <div className="mt-4 flex gap-4">
               <button 
-                onClick={() => { setGraph(generateVisualGraph(15)); setPathEdges(new Set()); }}
+                onClick={() => { setGraph(generateVisualGraph()); setPathEdges(new Set()); }}
                 className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-lg font-medium transition"
               >
-                Acak Peta
+                Acak Posisi
               </button>
               <button 
                 onClick={handleRunVisualizer}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex-grow"
               >
-                Cari Rute Terpendek
+                Kirim dari Gudang Rungkut
               </button>
             </div>
           </section>
@@ -171,7 +187,7 @@ export default function LogisRouteDashboard() {
           <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col">
             <h2 className="text-xl font-semibold mb-4">Engine Benchmark</h2>
             <p className="text-slate-600 mb-6 text-sm">
-              Uji performa perbandingan *runtime* Dijkstra dan Bellman-Ford pada ukuran dataset besar.
+              Uji performa perbandingan waktu eksekusi Dijkstra dan Bellman-Ford pada data berskala besar.
             </p>
             
             <button 
@@ -215,7 +231,6 @@ export default function LogisRouteDashboard() {
               </table>
             </div>
 
-            {/* Panggil fungsi render insight pintar di sini */}
             {renderInsight()}
 
           </section>
