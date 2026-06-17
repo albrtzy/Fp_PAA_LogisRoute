@@ -1,36 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LogisRoute - Surabaya Logistics Routing Optimization
 
-## Getting Started
+An interactive web dashboard built with Next.js and TypeScript to visualize and benchmark Shortest Path algorithms (Dijkstra vs. Bellman-Ford) using a realistic map of Surabaya. This project is created for the Design and Analysis of Algorithms (DAA) Final Exam.
 
-First, run the development server:
+## Core Features
+- **Live Visualizer (Surabaya Map):** Simulates real-world package delivery routing across 12 strategic areas in Surabaya, starting from the Rungkut Central Warehouse.
+- **Engine Benchmark:** Compares the execution runtime of Dijkstra and Bellman-Ford across 5 distinct scales (100, 500, 1000, 2500, and 5000 vertices) to observe real-world performance.
+- **Dynamic Insight Box:** Automatically analyzes and explains performance anomalies directly on the user interface after running the benchmark.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## How to Run and Reproduce
+Follow these simple steps to run the application locally on your machine:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Clone this repository and navigate into the project directory:
+   ```bash
+   cd Fp_PAA_LogisRoute/web
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Install all the required dependencies:
+   ```bash
+   npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Start the local development server:
+   ```bash
+   npm run dev, lalu ke http://localhost:3000
